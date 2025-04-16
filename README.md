@@ -1,5 +1,5 @@
 # DevPair_CodeCon
-# Lexalyze is a smart web app that uses AI to analyze legal documents like contracts and agreements. Users can upload files to get instant summaries that highlight key clauses, risks, and obligations, making legal content easier to understand for everyone.
+## Lexalyze is a smart web app that uses AI to analyze legal documents like contracts and agreements. Users can upload files to get instant summaries that highlight key clauses, risks, and obligations, making legal content easier to understand for everyone.
 
 🧠 Overview:
 Lexalyze is an intelligent web application designed to simplify the review of complex legal documents using the power of AI. By allowing users to upload contracts, agreements, or policy documents, the platform provides real-time, AI-generated summaries and analyses to help users quickly understand key clauses, potential risks, obligations, and legal implications.
