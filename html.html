@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lexalyze</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'burgundy': '#8B2635',
+                        'burgundy-dark': '#701F2B',
+                        'cream': '#F2EFE1',
+                        'cream-dark': '#E5E1D0',
+                        'text-dark': '#2C2C2C',
+                        'text-light': '#F2EFE1'
+                    },
+                    fontFamily: {
+                        'serif': ['Cormorant Garamond', 'serif'],
+                        'sans': ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #F2EFE1;
+            color: #2C2C2C;
+        }
+
+        .heading {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 500;
+        }
+
+        .logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        /* Navigation styles */
+        .chapter-nav {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid rgba(139, 38, 53, 0.2);
+        }
+
+        .chapter-item {
+            position: relative;
+            padding: 0 2rem;
+        }
+
+        .chapter-item::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 40px;
+            width: 1px;
+            background-color: rgba(139, 38, 53, 0.2);
+        }
+
+        .chapter-item:last-child::after {
+            display: none;
+        }
+
+        .chapter-number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            color: #8B2635;
+            margin-bottom: 0.25rem;
+        }
+
+        .chapter-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #8B2635;
+        }
+
+        .chapter-subtitle {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.65rem;
+            color: #2C2C2C;
+            opacity: 0.8;
+        }
+
+        /* Button styles */
+        .btn-primary {
+            background-color: #8B2635;
+            color: #F2EFE1;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 0.75rem 2rem;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #701F2B;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: #8B2635;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 0.75rem 2rem;
+            border: 1px solid #8B2635;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(139, 38, 53, 0.1);
+        }
+
+        /* Navigation arrows */
+        .nav-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 1px solid rgba(139, 38, 53, 0.3);
+            color: #8B2635;
+            transition: all 0.3s ease;
+        }
+
+        .nav-arrow:hover {
+            background-color: rgba(139, 38, 53, 0.1);
+        }
+
+        /* Form elements */
+        input, textarea, select {
+            background-color: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(139, 38, 53, 0.2);
+            padding: 0.75rem 1rem;
+            font-family: 'Montserrat', sans-serif;
+            color: #2C2C2C;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #8B2635;
+            box-shadow: 0 0 0 2px rgba(139, 38, 53, 0.1);
+        }
+
+        /* Chat styling */
+        .message { 
+            display: flex; 
+            align-items: flex-end; 
+            margin-bottom: 1rem;
+        }
+        
+        .user-message { 
+            justify-content: flex-end; 
+        }
+        
+        .bot-message { 
+            justify-content: flex-start; 
+        }
+        
+        .profile-image {
+            width: 32px; 
+            height: 32px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            margin: 0 8px;
+            border: 1px solid rgba(139, 38, 53, 0.3);
+        }
+        
+        .message-content {
+            max-width: 70%; 
+            padding: 1rem 1.25rem; 
+            border-radius: 0.5rem;
+            background: #fff; 
+            color: #2C2C2C; 
+            font-size: 0.9rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(139, 38, 53, 0.1);
+        }
+        
+        .user-message .message-content { 
+            background: #8B2635; 
+            color: #F2EFE1; 
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #F2EFE1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(139, 38, 53, 0.5);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8B2635;
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans bg-cream">
+
+    <!-- Navigation Bar -->
+    <header class="w-full bg-cream border-b border-burgundy/20 py-4 px-6 fixed top-0 z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="logo text-2xl tracking-wide flex items-center gap-2 text-burgundy">
+                <i class="fas fa-scale-balanced text-burgundy"></i>
+                LEXALYZE
+            </div>
+            
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center gap-8">
+                <button onclick="showSection('home')" 
+                        class="text-burgundy hover:text-burgundy-dark transition-colors text-sm uppercase tracking-widest">
+                    Home
+                </button>
+                <button onclick="showSection('imageAnalysis')" 
+                        class="text-burgundy hover:text-burgundy-dark transition-colors text-sm uppercase tracking-widest">
+                    Analysis
+                </button>
+                <button onclick="showSection('chatbot')" 
+                        class="text-burgundy hover:text-burgundy-dark transition-colors text-sm uppercase tracking-widest">
+                    Assistant
+                </button>
+                <a href="#contact" 
+                   class="btn-primary rounded-full">
+                    Contact
+                </a>
+            </nav>
+
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden text-burgundy text-xl" id="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <nav id="mobile-nav" 
+             class="md:hidden hidden absolute top-full left-0 w-full bg-cream border-b border-burgundy/20 py-4 px-6">
+            <div class="flex flex-col gap-4">
+                <button onclick="showSection('home')" 
+                        class="text-burgundy hover:text-burgundy-dark transition-colors text-left py-2 uppercase tracking-widest text-sm">
+                    Home
+                </button>
+                <button onclick="showSection('imageAnalysis')" 
+                        class="text-burgundy hover:text-burgundy-dark transition-colors text-left py-2 uppercase tracking-widest text-sm">
+                    Analysis
+                </button>
+                <button onclick="showSection('chatbot')" 
+                        class="text-burgundy hover:text-burgundy-dark transition-colors text-left py-2 uppercase tracking-widest text-sm">
+                    Assistant
+                </button>
+                <a href="#contact" 
+                   class="btn-primary text-center rounded-full">
+                    Contact
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Add spacing for fixed header -->
+    <div class="h-20"></div>
+
+    <!-- Chapter Navigation -->
+    <div class="chapter-nav bg-cream">
+        <div class="chapter-item">
+            <div class="chapter-number">I</div>
+            <div class="chapter-title">Chapter</div>
+            <div class="chapter-subtitle">Upload & Analyze</div>
+        </div>
+        <div class="chapter-item">
+            <div class="chapter-number">II</div>
+            <div class="chapter-title">Chapter</div>
+            <div class="chapter-subtitle">Document Analysis</div>
+        </div>
+        <div class="chapter-item">
+            <div class="chapter-number">III</div>
+            <div class="chapter-title">Chapter</div>
+            <div class="chapter-subtitle">AI Assistant</div>
+        </div>
+        <div class="chapter-item">
+            <div class="chapter-number">IV</div>
+            <div class="chapter-title">Chapter</div>
+            <div class="chapter-subtitle">Contact & Support</div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section id="home" class="content w-full flex flex-col items-center justify-center bg-burgundy text-cream py-20 min-h-[80vh]">
+        <div class="container mx-auto px-6 md:px-12 flex flex-col md:flex-row items-center">
+            <div class="w-full md:w-1/2 mb-12 md:mb-0">
+                <h1 class="text-4xl md:text-6xl heading mb-6 leading-tight">
+                    LEGAL<br>DOCUMENT<br>& ANALYSIS
+                </h1>
+                <p class="text-lg md:text-xl mb-10 font-light opacity-90 max-w-lg">
+                    Upload your legal documents and let our AI analyze, summarize, and highlight key information in seconds.
+                </p>
+                
+                <div class="flex flex-wrap gap-4 mb-10">
+                    <button onclick="showSection('imageAnalysis')" class="btn-outline text-cream border-cream hover:bg-white/10">
+                        Try Analysis
+                    </button>
+                    <button onclick="showSection('chatbot')" class="btn-primary bg-cream text-burgundy hover:bg-cream-dark">
+                        AI Assistant
+                    </button>
+                </div>
+            </div>
+            
+            <div class="w-full md:w-1/2 flex justify-center">
+                <img src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
+                     alt="Justice statue" 
+                     class="max-w-full h-auto max-h-[500px] object-contain grayscale contrast-125 mix-blend-screen" />
+            </div>
+        </div>
+    </section>
+
+    <!-- Upload & Analyze Section -->
+    <section class="bg-cream py-20">
+        <div class="container mx-auto px-6 md:px-12">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl heading mb-4 text-burgundy">CHAPTER I</h2>
+                <p class="text-lg text-text-dark/70 max-w-2xl mx-auto">Upload your document and let our advanced AI analyze its contents.</p>
+            </div>
+            
+            <div class="max-w-2xl mx-auto bg-white p-10 shadow-sm border border-burgundy/10">
+                <h3 class="text-2xl heading text-burgundy mb-8 text-center">Upload Document</h3>
+                
+                <input id="doc-upload" type="file" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
+                    class="mb-8 block w-full text-sm text-text-dark/70 file:mr-4 file:py-2 file:px-4
+                    file:rounded-none file:border file:border-burgundy file:text-sm
+                    file:bg-transparent file:text-burgundy hover:file:bg-burgundy/5 transition cursor-pointer" />
+                
+                <div class="flex justify-center">
+                    <button id="analyze-btn"
+                        class="btn-primary rounded-none disabled:opacity-70 disabled:cursor-not-allowed"
+                        disabled>
+                        Analyze Document
+                    </button>
+                </div>
+                
+                <div id="loading" class="mt-6 hidden text-burgundy flex items-center justify-center gap-2">
+                    <i class="fas fa-spinner fa-spin"></i> Analyzing...
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="results-section" class="max-w-4xl mx-auto mt-16 bg-white p-10 shadow-sm border border-burgundy/10 hidden">
+                <h2 class="text-3xl heading text-burgundy mb-8 text-center">Analysis Results</h2>
+                <div id="results-content" class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <!-- Results will appear here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="bg-burgundy text-cream py-20">
+        <div class="container mx-auto px-6 md:px-12">
+            <div class="max-w-3xl mx-auto">
+                <h2 class="text-3xl md:text-4xl heading mb-8 text-center">ABOUT THE PROJECT</h2>
+                <p class="text-lg mb-6 leading-relaxed">
+                    Lexalyze is an advanced legal document analysis platform that leverages artificial intelligence to extract key information, identify potential issues, and provide valuable insights from complex legal documents.
+                </p>
+                <p class="text-lg mb-10 leading-relaxed">
+                    Our system is designed to assist legal professionals, businesses, and individuals in understanding and navigating legal documents more efficiently, saving time and reducing the risk of overlooking critical details.
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+                    <div class="text-center">
+                        <div class="text-4xl heading mb-2">7+</div>
+                        <p class="uppercase tracking-widest text-sm">Years Experience</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl heading mb-2">500+</div>
+                        <p class="uppercase tracking-widest text-sm">Documents Analyzed</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl heading mb-2">100+</div>
+                        <p class="uppercase tracking-widest text-sm">Satisfied Clients</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Image Analysis Section -->
+    <section id="imageAnalysis" class="content w-full py-20 bg-cream">
+        <div class="container mx-auto px-6 md:px-12">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl heading mb-4 text-burgundy">CHAPTER II</h2>
+                <p class="text-lg text-text-dark/70 max-w-2xl mx-auto">Upload any legal document or image and our AI will analyze its content.</p>
+            </div>
+            
+            <div class="max-w-2xl mx-auto bg-white p-10 shadow-sm border border-burgundy/10">
+                <h3 class="text-2xl heading text-burgundy mb-8 text-center">Image Analysis</h3>
+                
+                <input type="file" 
+                    id="imageInput" 
+                    accept="image/*"
+                    class="mb-8 block w-full text-sm text-text-dark/70 file:mr-4 file:py-2 file:px-4
+                    file:rounded-none file:border file:border-burgundy file:text-sm
+                    file:bg-transparent file:text-burgundy hover:file:bg-burgundy/5 transition cursor-pointer" />
+                
+                <div id="imagePreview" class="w-full h-56 bg-cream flex items-center justify-center border border-burgundy/10 mb-8">
+                    <p class="text-text-dark/50">Image preview will appear here</p>
+                </div>
+                
+                <div class="flex justify-center">
+                    <button id="analyzeImageBtn" 
+                        class="btn-primary rounded-none disabled:opacity-70 disabled:cursor-not-allowed"
+                        disabled>
+                        Analyze Image
+                    </button>
+                </div>
+                
+                <div id="imageAnalysisResult" class="hidden mt-8 bg-cream p-6 border border-burgundy/10">
+                    <h3 class="font-medium mb-3 text-lg text-burgundy">Analysis Result:</h3>
+                    <p id="analysisText" class="text-text-dark/70"></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Chatbot Section -->
+    <section id="chatbot" class="content w-full py-20 bg-burgundy text-cream">
+        <div class="container mx-auto px-6 md:px-12">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl heading mb-4">CHAPTER III</h2>
+                <p class="text-lg opacity-90 max-w-2xl mx-auto">Chat with our AI legal assistant to get answers to your legal questions.</p>
+            </div>
+            
+            <div class="max-w-2xl mx-auto bg-white/10 backdrop-blur-sm p-10 shadow-sm border border-white/20">
+                <h3 class="text-2xl heading mb-8 text-center">Legal Assistant</h3>
+                
+                <div id="chat-messages" class="w-full h-80 bg-white/5 backdrop-blur-sm p-6 overflow-y-auto mb-6 flex flex-col gap-3 border border-white/10">
+                    <!-- Initial welcome message -->
+                    <div class="message bot-message">
+                        <img src="https://ui-avatars.com/api/?name=Lex&background=8B2635&color=fff" class="profile-image" alt="Bot">
+                        <div class="message-content bg-white/10 text-cream border-white/10">
+                            Hello! I'm your legal assistant. How can I help you today?
+                        </div>
+                    </div>
+                </div>
+                
+                <form id="chat-form" class="flex w-full gap-2" autocomplete="off" onsubmit="return false;">
+                    <input id="user-input" type="text" placeholder="Type your message..."
+                        class="flex-1 px-5 py-3 bg-white/5 text-cream border border-white/20 focus:border-white/40 placeholder-white/50" />
+                    <button id="send-button" type="submit" class="btn-primary bg-cream text-burgundy hover:bg-cream-dark">
+                        Send
+                    </button>
+                </form>
+                <div class="text-xs opacity-70 mt-3 text-center">Bot will also speak its responses aloud.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 bg-cream">
+        <div class="container mx-auto px-6 md:px-12">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl heading mb-4 text-burgundy">CHAPTER IV</h2>
+                <p class="text-lg text-text-dark/70 max-w-2xl mx-auto">Have questions about our services? Get in touch with our team.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-4xl mx-auto">
+                <div class="bg-white p-10 shadow-sm border border-burgundy/10">
+                    <h3 class="text-2xl heading text-burgundy mb-6">Get in Touch</h3>
+                    <div class="space-y-6 text-text-dark/70">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 flex items-center justify-center border border-burgundy/20 text-burgundy">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <p>123 Legal Avenue, Suite 500<br>New York, NY 10001</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 flex items-center justify-center border border-burgundy/20 text-burgundy">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <p>(555) 123-4567</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 flex items-center justify-center border border-burgundy/20 text-burgundy">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <p>info@lexalyze.com</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-10 shadow-sm border border-burgundy/10">
+                    <h3 class="text-2xl heading text-burgundy mb-6">Send a Message</h3>
+                    <form class="space-y-4">
+                        <div>
+                            <label class="block text-sm uppercase tracking-wider text-text-dark/70 mb-1">Your Name</label>
+                            <input type="text" class="w-full">
+                        </div>
+                        <div>
+                            <label class="block text-sm uppercase tracking-wider text-text-dark/70 mb-1">Email Address</label>
+                            <input type="email" class="w-full">
+                        </div>
+                        <div>
+                            <label class="block text-sm uppercase tracking-wider text-text-dark/70 mb-1">Your Message</label>
+                            <textarea rows="4" class="w-full"></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary rounded-none w-full">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation Controls -->
+    <div class="flex justify-between items-center max-w-4xl mx-auto px-6 py-10">
+        <button class="nav-arrow">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <div class="text-burgundy uppercase tracking-widest text-sm">Prev</div>
+        <div class="text-burgundy uppercase tracking-widest text-sm">Next</div>
+        <button class="nav-arrow">
+            <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-burgundy py-12 text-center text-cream">
+        <div class="container mx-auto px-4">
+            <div class="logo text-2xl mb-6">LEXALYZE</div>
+            <div class="flex justify-center space-x-6 mb-6 text-sm uppercase tracking-widest">
+                <a href="#" class="hover:opacity-80 transition">Privacy</a>
+                <a href="#" class="hover:opacity-80 transition">Terms</a>
+                <a href="#" class="hover:opacity-80 transition">Support</a>
+            </div>
+            <div class="border-t border-cream/20 pt-6 mt-6">
+                <p class="text-sm">&copy; <span id="year"></span> Lexalyze. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+
+    <script>
+        // Show Sections Based on Navigation Click
+        function showSection(sectionId) {
+            document.querySelectorAll('.content').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(sectionId).style.display = 'block';
+        }
+
+        // Display Home Section by Default
+        document.addEventListener("DOMContentLoaded", function () {
+            showSection('home');
+            window.speechSynthesis.getVoices(); // Load voices early
+            
+            // Add initial welcome message to chat if not already there
+            if (document.querySelectorAll('.message').length === 0) {
+                const welcomeMessage = document.createElement('div');
+                welcomeMessage.classList.add('message', 'bot-message');
+                welcomeMessage.innerHTML = `
+                    <img src="https://ui-avatars.com/api/?name=Lex&background=8B2635&color=fff" class="profile-image" alt="Bot">
+                    <div class="message-content bg-white/10 text-cream border-white/10">
+                        Hello! I'm your legal assistant. How can I help you today?
+                    </div>
+                `;
+                document.getElementById('chat-messages').appendChild(welcomeMessage);
+            }
+        });
+
+        // API Configuration
+        const API_CONFIG = {
+            gemini: {
+                url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent',
+                key: 'AIzaSyAr0RiT4gA2muZuZkj85eT-_cG6cUELaxU'
+            }
+        };
+
+        const API_KEY = 'AIzaSyAr0RiT4gA2muZuZkj85eT-_cG6cUELaxU';
+        const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
+
+        // Updated Image Analysis Functionality with OAuth 2.0 Support
+        async function analyzeImage(file) {
+            if (!file.type.startsWith('image/')) {
+                throw new Error('Please upload a valid image file');
+            }
+
+            const reader = new FileReader();
+            return new Promise((resolve, reject) => {
+                reader.onload = async (e) => {
+                    try {
+                        const base64Image = e.target.result.split(',')[1];
+                        console.log('Sending API request with image data...');
+
+                        const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                contents: [{ 
+                                    parts: [{ 
+                                        text: "Analyze this image and provide a detailed description.",
+                                        inlineData: {
+                                            mimeType: file.type,
+                                            data: base64Image
+                                        }
+                                    }] 
+                                }]
+                            })
+                        });
+
+                        if (!response.ok) {
+                            const errorDetails = await response.json();
+                            console.error(`API Error: ${response.status} - ${response.statusText}`, errorDetails);
+                            throw new Error(`API Error: ${response.status} - ${errorDetails.error?.message || 'Unknown error'}`);
+                        }
+
+                        const result = await response.json();
+                        console.log('API response received:', result);
+
+                        resolve({
+                            generated_text: result.candidates?.[0]?.content?.parts?.[0]?.text || 'No description available'
+                        });
+                    } catch (error) {
+                        console.error('Error during image analysis:', error);
+                        reject(error);
+                    }
+                };
+
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Debugging Image Analysis Button
+        const imageInput = document.getElementById('imageInput');
+        const analyzeImageBtn = document.getElementById('analyzeImageBtn');
+        const imageAnalysisResult = document.getElementById('imageAnalysisResult');
+        const analysisText = document.getElementById('analysisText');
+
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('imagePreview').innerHTML = `<img src="${e.target.result}" class="max-h-full max-w-full object-contain" />`;
+                };
+                reader.readAsDataURL(file);
+                analyzeImageBtn.disabled = false;
+            }
+        });
+
+        analyzeImageBtn.addEventListener('click', async () => {
+            const file = imageInput.files[0];
+            if (!file) return;
+
+            try {
+                analyzeImageBtn.disabled = true;
+                analyzeImageBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Analyzing...';
+                imageAnalysisResult.classList.add('hidden');
+
+                const result = await analyzeImage(file);
+
+                analysisText.innerHTML = `
+                    <div class="space-y-3">
+                        <p class="font-medium text-burgundy">Image Analysis:</p>
+                        <p class="text-text-dark/70">${result.generated_text || 'No description available'}</p>
+                    </div>
+                `;
+                imageAnalysisResult.classList.remove('hidden');
+            } catch (error) {
+                analysisText.innerHTML = `
+                    <div class="text-red-600">
+                        <p class="font-medium">Error:</p>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                imageAnalysisResult.classList.remove('hidden');
+            } finally {
+                analyzeImageBtn.disabled = false;
+                analyzeImageBtn.innerHTML = 'Analyze Image';
+            }
+        });
+
+        // AI Chatbot Configuration
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const chatForm = document.getElementById('chat-form');
+
+        function speakText(text) {
+            if (!'speechSynthesis' in window) {
+                console.error("Speech Synthesis API is not supported in this browser.");
+                return;
+            }
+            window.speechSynthesis.cancel(); // Stop any ongoing speech
+            const speech = new SpeechSynthesisUtterance(text);
+            speech.lang = 'en-US';
+            speech.rate = 1;
+            speech.pitch = 1;
+            speech.volume = 1;
+            window.speechSynthesis.onvoiceschanged = function () {};
+            setTimeout(() => {
+                window.speechSynthesis.speak(speech);
+            }, 300);
+        }
+
+        async function generateResponse(prompt) {
+            try {
+                const response = await fetch(`${API_CONFIG.gemini.url}?key=${API_CONFIG.gemini.key}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    }),
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to generate response');
+                }
+                const data = await response.json();
+                return data.candidates?.[0]?.content?.parts?.[0]?.text || "I couldn't understand that.";
+            } catch (error) {
+                console.error('Error:', error);
+                return "Oops! Something went wrong. Please try again later.";
+            }
+        }
+
+        function cleanMarkdown(text) {
+            return text.replace(/#{1,6}\s?/g, '').replace(/\\/g, '').replace(/\n{3,}/g, '\n\n').trim();
+        }
+
+        function addMessage(message, isUser) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', isUser ? 'user-message' : 'bot-message');
+
+            const profileImage = document.createElement('img');
+            profileImage.classList.add('profile-image');
+            profileImage.src = isUser 
+                ? 'https://ui-avatars.com/api/?name=User&background=E5E1D0&color=8B2635' 
+                : 'https://ui-avatars.com/api/?name=Lex&background=8B2635&color=fff';
+            profileImage.alt = isUser ? 'User' : 'Bot';
+
+            const messageContent = document.createElement('div');
+            messageContent.classList.add('message-content');
+            if (!isUser) {
+                messageContent.classList.add('bg-white/10', 'text-cream', 'border-white/10');
+            }
+            messageContent.textContent = message;
+
+            if (isUser) {
+                messageElement.appendChild(messageContent);
+                messageElement.appendChild(profileImage); // User image on the right
+            } else {
+                messageElement.appendChild(profileImage); // Bot image on the left
+                messageElement.appendChild(messageContent);
+            }
+
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            if (!isUser) {
+                speakText(message);
+            }
+        }
+
+        async function handleUserInput() {
+            const userMessage = userInput.value.trim();
+            if (!userMessage) return;
+
+            addMessage(userMessage, true);
+            userInput.value = '';
+            sendButton.disabled = true;
+            userInput.disabled = true;
+
+            try {
+                const botMessage = await generateResponse(userMessage);
+                addMessage(cleanMarkdown(botMessage), false);
+            } catch (error) {
+                addMessage('Sorry, I encountered an error. Please try again.', false);
+            } finally {
+                sendButton.disabled = false;
+                userInput.disabled = false;
+                userInput.focus();
+            }
+        }
+
+        chatForm.addEventListener('submit', handleUserInput);
+        sendButton.addEventListener('click', handleUserInput);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleUserInput();
+            }
+        });
+
+        // Legal Document Analyzer with Image Analysis
+        const uploadInput = document.getElementById('doc-upload');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const loadingDiv = document.getElementById('loading');
+        const resultsSection = document.getElementById('results-section');
+        const resultsContent = document.getElementById('results-content');
+
+        async function parsePDF(file) {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                let fullText = '';
+                
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    fullText += pageText + '\n\n';
+                }
+                
+                return {
+                    text: fullText,
+                    pages: pdf.numPages
+                };
+            } catch (error) {
+                console.error('PDF parsing error:', error);
+                throw new Error('Failed to parse PDF document');
+            }
+        }
+
+        async function analyzeText(text) {
+            try {
+                const response = await fetch(`${API_CONFIG.gemini.url}?key=${API_CONFIG.gemini.key}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ 
+                            parts: [{ 
+                                text: `Analyze this text and provide key insights: ${text}` 
+                            }] 
+                        }]
+                    }),
+                });
+
+                if (!response.ok) throw new Error('Failed to analyze text');
+                const data = await response.json();
+
+                // Format results point-wise
+                const analysis = data.candidates?.[0]?.content?.parts?.[0]?.text || "No analysis available";
+                const points = analysis.split('\n').filter(line => line.trim() !== '');
+                return points.map((point, index) => `<li class="mb-3">${point}</li>`).join('');
+            } catch (error) {
+                console.error('Text analysis error:', error);
+                throw new Error('Failed to analyze text content');
+            }
+        }
+
+        uploadInput.addEventListener('change', () => {
+            analyzeBtn.disabled = !uploadInput.files.length;
+        });
+
+        analyzeBtn.addEventListener('click', async () => {
+            const file = uploadInput.files[0];
+            if (!file) return;
+
+            resultsSection.classList.add('hidden');
+            loadingDiv.classList.remove('hidden');
+            analyzeBtn.disabled = true;
+
+            try {
+                if (file.type === 'application/pdf') {
+                    const pdfData = await parsePDF(file);
+                    const analysis = await analyzeText(pdfData.text.substring(0, 1500)); // Analyze first 1500 chars
+                    resultsContent.innerHTML = `
+                        <div>
+                            <h3 class="text-xl heading text-burgundy mb-4">Document Overview</h3>
+                            <div class="mb-6">
+                                <div class="flex justify-between items-center border-b border-burgundy/10 py-2">
+                                    <span class="text-text-dark/70">Pages</span>
+                                    <span class="font-medium">${pdfData.pages}</span>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-burgundy/10 py-2">
+                                    <span class="text-text-dark/70">Document Type</span>
+                                    <span class="font-medium">PDF</span>
+                                </div>
+                            </div>
+                            <div class="bg-cream p-4 border border-burgundy/10">
+                                <h4 class="font-medium mb-2 text-burgundy">Content Preview</h4>
+                                <div class="max-h-60 overflow-y-auto text-text-dark/70 text-sm">
+                                    ${pdfData.text.substring(0, 500)}...
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl heading text-burgundy mb-4">Key Insights</h3>
+                            <ul class="list-disc pl-5 space-y-1 text-text-dark/70">
+                                ${analysis}
+                            </ul>
+                        </div>
+                    `;
+                } else {
+                    resultsContent.innerHTML = `
+                        <div class="col-span-2 text-center">
+                            <div class="p-6 border border-red-300 text-red-600">
+                                <h3 class="font-medium text-xl mb-2">Unsupported File Type</h3>
+                                <p>Please upload a PDF document for analysis.</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultsContent.innerHTML = `
+                    <div class="col-span-2 text-center">
+                        <div class="p-6 border border-red-300 text-red-600">
+                            <h3 class="font-medium text-xl mb-2">Error Analyzing File</h3>
+                            <p>${error.message}</p>
+                        </div>
+                    </div>
+                `;
+            } finally {
+                loadingDiv.classList.add('hidden');
+                resultsSection.classList.remove('hidden');
+                analyzeBtn.disabled = false;
+            }
+        });
+
+        // Mobile Navigation Script
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileNav = document.getElementById('mobile-nav');
+
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileNav.classList.toggle('hidden');
+                mobileMenuBtn.innerHTML = mobileNav.classList.contains('hidden') ? 
+                    '<i class="fas fa-bars"></i>' : 
+                    '<i class="fas fa-times"></i>';
+            });
+        });
+    </script>
+</body>
+</html>
