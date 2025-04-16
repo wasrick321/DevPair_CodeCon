@@ -1,46 +1,58 @@
 # DevPair_CodeCon
 ### Lexalyze is a smart web app that uses AI to analyze legal documents like contracts and agreements. Users can upload files to get instant summaries that highlight key clauses, risks, and obligations, making legal content easier to understand for everyone.
 
-🧠 Overview:
-Lexalyze is an intelligent web application designed to simplify the review of complex legal documents using the power of AI. By allowing users to upload contracts, agreements, or policy documents, the platform provides real-time, AI-generated summaries and analyses to help users quickly understand key clauses, potential risks, obligations, and legal implications.
+# Lexalyze - AI-Powered Legal Document Analyzer
 
-🎯 Problem Statement:
-Legal documents are often long, dense, and filled with technical jargon, making it difficult for individuals and businesses to interpret them without professional help. This can lead to misinterpretations, overlooked liabilities, or missed deadlines.
+Lexalyze is an advanced web application designed to analyze legal documents using AI. It extracts key information, identifies potential issues, and provides valuable insights to assist legal professionals, businesses, and individuals.
 
-💡 Our Solution:
-Lexalyze uses OpenAI's GPT model to analyze legal documents uploaded by users. It processes the content and generates a natural language summary highlighting:
+## Features
 
-Key clauses and obligations
+- **PDF Document Analysis**: Upload PDF files for AI-powered analysis.
+- **AI Assistant**: Chat with an AI assistant to ask legal questions.
+- **Image Analysis**: Upload images of legal documents for interpretation.
+- **Responsive Design**: Fully responsive UI built with Tailwind CSS.
+- **Customizable Themes**: Tailored color schemes and fonts for a professional look.
 
-Legal risks or red flags
+## Technologies Used
 
-Important deadlines or terms
+- **Frontend**: HTML, CSS, JavaScript
+- **Styling**: Tailwind CSS
+- **Icons**: Font Awesome
+- **PDF Parsing**: [PDF.js](https://mozilla.github.io/pdf.js/)
+- **AI Integration**: Google Gemini API, Hugging Face API
 
-Suggestions for review or caution
 
-⚙️ Tech Stack:
-Frontend: HTML, CSS, JavaScript
+## Setup Instructions
 
-AI Integration: OpenAI GPT-3.5 Turbo API
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/lexalyze.git
+   cd lexalyze
+Open the project in your preferred IDE (e.g., Visual Studio Code).
 
-Features:
+Install dependencies:
 
-Upload .txt or .pdf documents
+Tailwind CSS is included via CDN.
+Font Awesome is included via CDN.
+PDF.js is included via CDN.
+Run the project:
 
-Read and extract content
+Open index.html or html.html in your browser.
+Usage
+Upload a Document:
 
-Send content to OpenAI for analysis
+Navigate to the "Upload Document" section.
+Upload a PDF or image file for analysis.
+Analyze Text:
 
-Display insights in user-friendly format
+Paste legal text into the provided text area.
+Click "Analyze" to get AI-generated insights.
+Chat with AI:
 
-🌐 Key Features:
-Intuitive user interface with a clean layout
+Use the chatbot to ask legal questions.
+API Configuration
+The project uses the following APIs:
 
-Secure and private document processing
+Google Gemini API: For text analysis.
 
-Fast and reliable AI-driven analysis
 
-Works on web with no setup or downloads required
-
-🚀 Impact:
-Lexalyze bridges the gap between legal complexity and everyday understanding. It empowers users—whether individuals, startups, or small businesses—to make informed decisions without needing immediate access to a legal professional.
